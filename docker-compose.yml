@@ -1,0 +1,43 @@
+version: "3.6"
+
+services:
+  nginx:
+    image: nginx:1.19.10-alpine
+    ports:
+      - "8006:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - heyworld
+
+  php:
+    image: heyworld_php:0.0.1
+    build:
+      context: ./
+      dockerfile: ./docker/php/php.dockerfile
+    volumes:
+      - ./:/var/www/html
+    user: heyworld
+    networks:
+      - heyworld
+
+  composer:
+    image: heyworld_composer:0.0.1
+    build:
+      context: ./
+      dockerfile: ./docker/composer/composer.dockerfile
+    volumes:
+      - ./:/var/www/html
+      - $HOME/.composer/cache:/home/heyworld/.composer/cache
+    working_dir: /var/www/html
+    depends_on:
+      - php
+    user: heyworld
+    networks:
+      - heyworld
+
+networks:
+  heyworld:
+
